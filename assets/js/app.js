@@ -712,14 +712,59 @@
     renderCart();
   }
 
+ // ============================================
+  // WHOLESALE TIER LOGIC
+  // ============================================
+  // 4 quantity-based pricing tiers
+  const WHOLESALE_TIERS = [
+    { min: 1,   max: 10, discount: 0.25, name: 'Tier 1' },
+    { min: 11,  max: 49, discount: 0.35, name: 'Tier 2' },
+    { min: 50,  max: 99, discount: 0.50, name: 'Tier 3' },
+    { min: 100, max: Infinity, discount: 0.60, name: 'Tier 4' },
+  ];
+
+  function getWholesaleTier(unitCount) {
+    return WHOLESALE_TIERS.find(t => unitCount >= t.min && unitCount <= t.max)
+      || WHOLESALE_TIERS[0];
+  }
+
+  function bestWholesaleTier() {
+    return WHOLESALE_TIERS[WHOLESALE_TIERS.length - 1];
+  }
+
+  function wholesalePriceAtTier(retailPrice, tier) {
+    return Math.round(retailPrice * (1 - tier.discount));
+  }
+
+  function currentCartTier() {
+    return getWholesaleTier(state.cart.length);
+  }
+
+  function nextTierNudge() {
+    const count = state.cart.length;
+    const current = getWholesaleTier(count);
+    const currentIdx = WHOLESALE_TIERS.indexOf(current);
+    if (currentIdx >= WHOLESALE_TIERS.length - 1) return null;
+    const next = WHOLESALE_TIERS[currentIdx + 1];
+    const needed = next.min - count;
+    return { needed, discount: next.discount, tier: next };
+  }
+
   function cartTotal() {
     const isWholesale = document.body.classList.contains('is-wholesale');
+    if (isWholesale) {
+      const tier = currentCartTier();
+      return state.cart.reduce((sum, item) => {
+        const p = PRODUCTS[item.productId];
+        if (!p) return sum;
+        return sum + wholesalePriceAtTier(p.price, tier);
+      }, 0);
+    }
     return state.cart.reduce((sum, item) => {
       const p = PRODUCTS[item.productId];
-      if (!p) return sum;
-      return sum + (isWholesale ? Math.round(p.price * 0.65) : p.price);
+      return p ? sum + p.price : sum;
     }, 0);
-  }
+  } 
 
   function updateCartCount() {
     document.querySelector('.header__cart-count').textContent = `[${state.cart.length}]`;
@@ -863,7 +908,8 @@
     const tagHTML = p.tag
       ? `<span class="product__tag${p.tagAlt ? ' product__tag--alt' : ''}">${p.tag}</span>`
       : '';
-    const wholesale = Math.round(p.price * 0.65);
+  const currentTier = currentCartTier();
+    const wholesale = wholesalePriceAtTier(p.price, currentTier);
     const priceWas = p.priceWas ? `<span class="product__price-was">$${p.priceWas}</span>` : '';
     const sizesHTML = Object.entries(p.sizes).map(([s, status]) =>
       `<div class="product__size${status === 'sold' ? ' sold' : ''}" data-size="${s}">${s}</div>`
@@ -1080,8 +1126,7 @@
           const addBtn = document.getElementById('pd-add');
           addBtn.disabled = false;
           const isWholesale = document.body.classList.contains('is-wholesale');
-          const displayPrice = isWholesale ? Math.round(p.price * 0.65) : p.price;
-          addBtn.textContent = `Add to cart — $${displayPrice}`;
+const displayPrice = isWholesale ? wholesalePriceAtTier(p.price, currentCartTier()) : p.price;          addBtn.textContent = `Add to cart — $${displayPrice}`;
           addBtn.dataset.size = s;
         });
       }
@@ -1096,8 +1141,7 @@
       if (!addBtn.dataset.size) return;
       addToCart(id, addBtn.dataset.size);
       const isWholesale = document.body.classList.contains('is-wholesale');
-      const displayPrice = isWholesale ? Math.round(p.price * 0.65) : p.price;
-      const orig = `Add to cart — $${displayPrice}`;
+const displayPrice = isWholesale ? wholesalePriceAtTier(p.price, currentCartTier()) : p.price;      const orig = `Add to cart — $${displayPrice}`;
       addBtn.textContent = 'Added ✓';
       setTimeout(() => { addBtn.textContent = orig; }, 1400);
     };
@@ -1144,8 +1188,9 @@
       if (!p) return '';
       const brand = BRANDS[p.brand];
       const isWholesale = document.body.classList.contains('is-wholesale');
-      const displayPrice = isWholesale ? Math.round(p.price * 0.65) : p.price;
-      const wholesaleNote = isWholesale ? ` <span style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;color:var(--ink-soft);">W</span>` : '';
+      const cartTier = currentCartTier();
+      const displayPrice = isWholesale ? wholesalePriceAtTier(p.price, cartTier) : p.price;
+      const wholesaleNote = isWholesale ? ` <span style="font-family:var(--mono);font-size:10px;letter-spacing:0.14em;color:var(--ink-soft);">${cartTier.name.replace('Tier ', 'T')}</span>` : '';;
       return `
         <div class="cart-line">
           <div class="cart-line__img cart-line__img--${p.variant}" data-nav="product" data-product="${item.productId}">${brand.name}</div>
@@ -1159,6 +1204,17 @@
         </div>`;
     }).join('');
 
+   const isWholesaleCart = document.body.classList.contains('is-wholesale');
+    const cartTier = currentCartTier();
+    const nudge = nextTierNudge();
+    let tierBlock = '';
+    if (isWholesaleCart) {
+      const tierLabel = `<div class="cart-summary__row" style="border-top:1px solid var(--line);padding-top:12px;margin-top:8px;"><span>Wholesale tier</span><span>${cartTier.name} (${Math.round(cartTier.discount*100)}% off)</span></div>`;
+      const nudgeLabel = nudge
+        ? `<div class="cart-summary__nudge" style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;color:var(--ink-soft);padding:8px 0;text-transform:uppercase;">★ Add ${nudge.needed} more item${nudge.needed!==1?'s':''} for ${Math.round(nudge.discount*100)}% off</div>`
+        : `<div class="cart-summary__nudge" style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;color:var(--ink-soft);padding:8px 0;text-transform:uppercase;">★ Top tier unlocked</div>`;
+      tierBlock = tierLabel + nudgeLabel;
+    }
     grid.innerHTML = `
       <div>${linesHTML}</div>
       <aside class="cart-summary">
@@ -1166,6 +1222,7 @@
         <div class="cart-summary__row"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>
         <div class="cart-summary__row"><span>Shipping</span><span>${shipping === 0 ? 'FREE' : '$' + shipping.toFixed(2)}</span></div>
         <div class="cart-summary__row"><span>Authentication</span><span>Included</span></div>
+        ${tierBlock}
         <div class="cart-summary__row cart-summary__row--total"><span>Total</span><span>$${total.toFixed(2)}</span></div>
         <button class="cart-summary__checkout" id="cart-request-order-btn">Request order →</button>
         <p class="cart-summary__note">We'll confirm availability and arrange payment within 4 hours.</p>
@@ -1946,8 +2003,8 @@
     const linesHTML = state.cart.map(item => {
       const p = PRODUCTS[item.productId];
       if (!p) return '';
-      const displayPrice = isWholesale ? Math.round(p.price * 0.65) : p.price;
-      subtotal += displayPrice;
+ const summaryTier = currentCartTier();
+      const displayPrice = isWholesale ? wholesalePriceAtTier(p.price, summaryTier) : p.price;     subtotal += displayPrice;
       return `
         <div class="request-order-line">
           <div class="request-order-line__name">
@@ -1958,10 +2015,9 @@
         </div>`;
     }).join('');
 
+    const orderTier = currentCartTier();
     const wholesaleNote = isWholesale
-      ? '<div class="request-order-summary__wholesale-note">★ Wholesale pricing applied (35% off retail)</div>'
-      : '';
-
+ `<div class="request-order-summary__wholesale-note">★ Wholesale pricing applied (${orderTier.name} · ${Math.round(orderTier.discount*100)}% off · ${state.cart.length} units)</div>`
     requestOrderSummary.innerHTML = `
       <div class="request-order-summary__title">Your selection (${state.cart.length} item${state.cart.length !== 1 ? 's' : ''})</div>
       ${linesHTML}
@@ -2038,11 +2094,11 @@
     // Build the order summary as a readable string for the email
     const isWholesale = document.body.classList.contains('is-wholesale');
     let subtotal = 0;
+    const submitTier = currentCartTier();
     const itemsList = state.cart.map(item => {
       const p = PRODUCTS[item.productId];
       if (!p) return '';
-      const displayPrice = isWholesale ? Math.round(p.price * 0.65) : p.price;
-      subtotal += displayPrice;
+const displayPrice = isWholesale ? wholesalePriceAtTier(p.price, submitTier) : p.price;      subtotal += displayPrice;
       return `${p.name} / Size ${item.size} / $${displayPrice}`;
     }).join('\n');
 
@@ -2153,6 +2209,13 @@
   document.getElementById('about-wholesale-cta')?.addEventListener('click', () => {
     document.getElementById('apply-modal')?.classList.add('active');
     document.body.style.overflow = 'hidden';
+  });
+  // Wholesale tease link on product detail -> opens apply modal
+  document.body.addEventListener('click', (e) => {
+    if (e.target?.id === 'pd-tease-apply') {
+      e.preventDefault();
+      document.getElementById('wholesale-apply-modal')?.classList.add('open');
+    }
   });
 
 

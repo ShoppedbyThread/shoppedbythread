@@ -4432,3 +4432,51 @@
     .splash__heading { font-size: 24px; }
     .splash__panel-logo { height: 60px; max-width: 200px; }
   }
+  /* WHOLESALE TIER TEASE + NUDGE (product detail page) */
+  .pd__wholesale-tease {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 20px;
+    margin: 16px 0 8px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .pd__tease-price {
+    font-family: var(--display);
+    font-size: 22px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .pd__tease-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .pd__tease-link {
+    margin-top: 4px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .pd__tease-link:hover { opacity: 0.7; }
+
+  .pd__wholesale-nudge {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    padding: 12px 16px;
+    margin: 12px 0 0;
+    background: var(--bg-2);
+    border-left: 3px solid var(--logo-gold);
+    border-radius: 4px;
+  }
