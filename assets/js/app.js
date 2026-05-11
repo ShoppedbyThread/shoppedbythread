@@ -1059,6 +1059,40 @@
       <span class="price-wholesale">$${wholesalePrice}</span>
       <span class="price-retail-strike">$${p.price}</span>
     `;
+    // Tease line (only for non-wholesale visitors)
+    const isWholesalePD = document.body.classList.contains('is-wholesale');
+    const bestTier = bestWholesaleTier();
+    const bestPrice = wholesalePriceAtTier(p.price, bestTier);
+    const teaseEl = document.getElementById('pd-wholesale-tease');
+    if (teaseEl) {
+      if (!isWholesalePD) {
+        teaseEl.innerHTML = `
+          <span class="pd__tease-price">Wholesale from $${bestPrice}</span>
+          <span class="pd__tease-meta">${Math.round(bestTier.discount*100)}% off at ${bestTier.min}+ units</span>
+          <a class="pd__tease-link" id="pd-tease-apply">Apply for wholesale →</a>
+        `;
+        teaseEl.style.display = '';
+      } else {
+        teaseEl.style.display = 'none';
+      }
+    }
+    // Upgrade nudge (only for wholesale buyers)
+    const nudgeEl = document.getElementById('pd-wholesale-nudge');
+    if (nudgeEl) {
+      if (isWholesalePD) {
+        const currentTierPD = currentCartTier();
+        const nudge = nextTierNudge();
+        if (nudge) {
+          nudgeEl.innerHTML = `★ Add ${nudge.needed} more item${nudge.needed!==1?'s':''} to unlock ${Math.round(nudge.discount*100)}% off`;
+          nudgeEl.style.display = '';
+        } else {
+          nudgeEl.innerHTML = `★ Maximum wholesale tier active (${Math.round(currentTierPD.discount*100)}% off)`;
+          nudgeEl.style.display = '';
+        }
+      } else {
+        nudgeEl.style.display = 'none';
+      }
+    }
     document.getElementById('pd-cond').textContent = p.cond;
     document.getElementById('pd-main-img').textContent = brand.name;
     document.getElementById('pd-crumb-brand').textContent = brand.name;
