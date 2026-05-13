@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shopped By Thread — Curated Streetwear Resell</title>
+<link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/images/favicon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/images/favicon-512x512.png">
+  <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;1,9..144,400;1,9..144,700&family=Tenor+Sans&family=Italiana&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="assets/css/styles.css">
+
+<!-- ============================================ -->
+<!-- CLERK AUTH (loaded async)                   -->
+<!-- ============================================ -->
+<script
+  async
+  crossorigin="anonymous"
+  data-clerk-publishable-key="pk_live_Y2xlcmsuc2hvcHBlZGJ5dGhyZWFkLmNvbSQ"
+  src="https://clerk.shoppedbythread.com/npm/@clerk/[email protected]/dist/clerk.browser.js"
+  type="text/javascript"
+></script>
+</head>
+<body>
+
+<!-- Hidden preload of logo data URI; assigned via JS so HTML stays clean -->
+
+
+<!-- ============================================ -->
+<!-- SPLASH OVERLAY (ALD-style entry experience) -->
+<!-- ============================================ -->
+<div class="splash" id="splash">
+  <div class="splash__photo">
+    <img class="splash__photo-bg"
+         src="assets/images/image-21-b4925e7de4f1a65b.jpg"
+         alt="Shopped By Thread editorial">
+  </div>
+  <div class="splash__panel">
+    <div class="splash__top">
+      <span>EST. 2026 / LAS VEGAS</span>
+      <span>WORLDWIDE SHIPPING</span>
+    </div>
+
+    <img class="logo-img splash__panel-logo" alt="Shopped By Thread" data-logo>
+
+    <div class="splash__main">
+      <h1 class="splash__heading"><em>Curated</em> streetwear.</h1>
+      <p class="splash__sub">Deadstock, grails, and rotating drops — every piece hand-checked and graded before it lands in your closet.</p>
+
+      <div class="splash__form">
+        <div class="splash__offer">
+          <div class="splash__offer-tag">Limited Welcome Offer</div>
+          <div class="splash__offer-headline">
+            <span class="splash__offer-percent">20<span class="splash__offer-percent-sign">%</span></span>
+            <div class="splash__offer-text">
+              <div class="splash__offer-text-main">off your first piece</div>
+              <div class="splash__offer-text-sub">when you join the list below</div>
+            </div>
+          </div>
+        </div>
+        <div class="splash__form-row">
+          <input type="email" id="splash-email" placeholder="Email address" autocomplete="email" />
+          <button id="splash-email-btn" type="button">Claim 20% →</button>
+        </div>
+        <div class="splash__form-row">
+          <input type="tel" id="splash-phone" placeholder="Phone (optional, for SMS alerts)" autocomplete="tel" />
+          <button id="splash-phone-btn" type="button">Send →</button>
+        </div>
+        <div class="splash__form-status" id="splash-form-status"></div>
+      </div>
+    </div>
+
+    <a href="javascript:void(0)" class="splash__enter" id="enterBtn">Enter site</a>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- WHOLESALE GATE (Clerk account-based access) -->
+<!-- ============================================ -->
+<div class="gate" id="gate">
+  <div class="gate__bg"></div>
+  <div class="gate__inner">
+    <img class="gate__logo logo-img" alt="Shopped By Thread" data-logo>
+    <div class="gate__eyebrow">By Invitation Only</div>
+    <h1 class="gate__title"><em>Wholesale</em> Access</h1>
+
+    <!-- STATE A: Logged out -->
+    <div class="gate__state" id="gate-state-loggedout">
+      <p class="gate__sub">Verified accounts only. Sign in to view exclusive bulk pricing, or apply for access if you're a new partner.</p>
+      <div class="gate__actions">
+        <button class="gate__btn gate__btn--primary" id="gate-signin-btn">Sign in</button>
+        <button class="gate__btn gate__btn--ghost" id="gate-apply-btn-a">Apply for access</button>
+      </div>
+    </div>
+
+    <!-- STATE B: Logged in but NOT approved -->
+    <div class="gate__state" id="gate-state-pending" style="display:none;">
+      <p class="gate__sub">Hi <span id="gate-user-name">there</span> — your account isn't approved for wholesale access yet. If you've already applied, we'll review within 48 hours and email you once you're approved. Otherwise, apply below.</p>
+      <div class="gate__actions">
+        <button class="gate__btn gate__btn--primary" id="gate-apply-btn-b">Apply for wholesale</button>
+        <button class="gate__btn gate__btn--ghost" id="gate-signout-btn">Sign out</button>
+      </div>
+      <div class="gate__pending-note">Already applied? Check your email — we reply within 48 hours.</div>
+    </div>
+
+    <a class="gate__back" id="gate-back">← Return to retail site</a>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- WHOLESALE APPLY MODAL                        -->
+<!-- ============================================ -->
+<div class="apply-modal" id="apply-modal">
+  <div class="apply-modal__backdrop" id="apply-modal-backdrop"></div>
+  <div class="apply-modal__panel">
+    <button class="apply-modal__close" id="apply-modal-close" aria-label="Close">×</button>
+    <div class="apply-modal__eyebrow">Wholesale Application</div>
+    <h2 class="apply-modal__title">Apply for <em>access</em></h2>
+    <p class="apply-modal__sub">Tell us about your business. We'll review and reach out within 48 hours.</p>
+
+    <div class="apply-modal__form" id="apply-form">
+      <div class="apply-modal__field">
+        <label>Business name</label>
+        <input type="text" id="apply-business" autocomplete="organization" />
+      </div>
+      <div class="apply-modal__field">
+        <label>Your name</label>
+        <input type="text" id="apply-name" autocomplete="name" />
+      </div>
+      <div class="apply-modal__field">
+        <label>Email</label>
+        <input type="email" id="apply-email" autocomplete="email" />
+      </div>
+      <div class="apply-modal__field">
+        <label>Phone (optional)</label>
+        <input type="tel" id="apply-phone-input" autocomplete="tel" />
+      </div>
+      <div class="apply-modal__field">
+        <label>What kind of business / how did you hear about us?</label>
+        <textarea id="apply-message" rows="3"></textarea>
+      </div>
+
+      <button class="apply-modal__submit" id="apply-submit" type="button">Submit Application →</button>
+      <div class="apply-modal__status" id="apply-status"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- SIZE GUIDE MODAL                            -->
+<!-- ============================================ -->
+<div class="apply-modal" id="size-guide-modal">
+  <div class="apply-modal__backdrop" id="size-guide-backdrop"></div>
+  <div class="apply-modal__panel size-guide-panel">
+    <button class="apply-modal__close" id="size-guide-close" aria-label="Close">×</button>
+    <div class="apply-modal__eyebrow">Sizing reference</div>
+    <h2 class="apply-modal__title">Size <em>guide</em></h2>
+    <p class="apply-modal__sub">Use these references to pick your size. When in doubt between two, size up — most streetwear is intended to fit oversized.</p>
+
+    <div class="size-guide-tabs">
+      <button class="size-guide-tab active" data-size-tab="apparel">Apparel</button>
+      <button class="size-guide-tab" data-size-tab="footwear">Footwear</button>
+    </div>
+
+    <div class="size-guide-content" data-size-tab-content="apparel">
+      <table class="size-table">
+        <thead>
+          <tr><th>Size</th><th>Chest</th><th>Length</th><th>Sleeve</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>S</td><td>20"</td><td>27"</td><td>24"</td></tr>
+          <tr><td>M</td><td>22"</td><td>28"</td><td>25"</td></tr>
+          <tr><td>L</td><td>24"</td><td>29"</td><td>26"</td></tr>
+          <tr><td>XL</td><td>26"</td><td>30"</td><td>27"</td></tr>
+        </tbody>
+      </table>
+      <p class="size-guide-note">Measurements are flat-lay garment dimensions. Most pieces are designed for an oversized fit. Add 1-2 inches to chest measurement compared to your typical size.</p>
+    </div>
+
+    <div class="size-guide-content" data-size-tab-content="footwear" style="display:none;">
+      <table class="size-table">
+        <thead>
+          <tr><th>US</th><th>EU</th><th>UK</th><th>JP (cm)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>7</td><td>40</td><td>6</td><td>25</td></tr>
+          <tr><td>8</td><td>41</td><td>7</td><td>26</td></tr>
+          <tr><td>9</td><td>42</td><td>8</td><td>27</td></tr>
+          <tr><td>10</td><td>43</td><td>9</td><td>28</td></tr>
+          <tr><td>11</td><td>44</td><td>10</td><td>29</td></tr>
+          <tr><td>12</td><td>45</td><td>11</td><td>30</td></tr>
+        </tbody>
+      </table>
+      <p class="size-guide-note">Sizing varies by brand. Maison Mihara Yasuhiro and most Japanese labels run true to US sizing. Bape often runs small — consider sizing up half a size.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- AUTH MODAL (sign in / sign up)              -->
+<!-- ============================================ -->
+<div class="apply-modal" id="auth-modal">
+  <div class="apply-modal__backdrop" id="auth-modal-backdrop"></div>
+  <div class="apply-modal__panel auth-modal-panel">
+    <button class="apply-modal__close" id="auth-modal-close" aria-label="Close">×</button>
+
+    <!-- Tabs: Sign in / Sign up -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-auth-tab="signin">Sign in</button>
+      <button class="auth-tab" data-auth-tab="signup">Create account</button>
+    </div>
+
+    <!-- SIGN IN -->
+    <div class="auth-content" data-auth-content="signin">
+      <div class="apply-modal__eyebrow">Welcome back</div>
+      <h2 class="apply-modal__title">Sign <em>in</em></h2>
+      <p class="apply-modal__sub">Continue where you left off — your saved pieces and order history are waiting.</p>
+
+      <div class="auth-social">
+        <button class="auth-social__btn" id="auth-google-signin">
+          <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
+        <button class="auth-social__btn" id="auth-apple-signin">
+          <svg width="18" height="18" viewBox="0 0 14 17" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M11.624 8.74c-.02-2.16 1.764-3.21 1.846-3.26-1.008-1.474-2.575-1.675-3.13-1.696-1.33-.135-2.601.785-3.276.785-.687 0-1.728-.766-2.847-.745-1.464.022-2.815.851-3.567 2.16-1.522 2.638-.387 6.534 1.094 8.674.726 1.05 1.585 2.226 2.717 2.184 1.094-.044 1.51-.708 2.83-.708 1.31 0 1.694.708 2.85.685 1.176-.02 1.92-1.064 2.638-2.121.832-1.215 1.174-2.397 1.187-2.458-.026-.012-2.276-.873-2.298-3.46zM9.475 2.378c.6-.73.999-1.74.892-2.747-.864.036-1.91.575-2.526 1.297-.553.638-1.041 1.668-.91 2.658.964.072 1.946-.49 2.544-1.208z"/></svg>
+          Continue with Apple
+        </button>
+      </div>
+
+      <div class="auth-divider"><span>or</span></div>
+
+      <div class="apply-modal__field">
+        <label>Email</label>
+        <input type="email" id="auth-signin-email" autocomplete="email" />
+      </div>
+      <div class="apply-modal__field">
+        <label>Password</label>
+        <input type="password" id="auth-signin-password" autocomplete="current-password" />
+      </div>
+
+      <button class="apply-modal__submit" id="auth-signin-submit" type="button">Sign in →</button>
+      <div class="apply-modal__status" id="auth-signin-status"></div>
+
+      <div class="auth-footnote">
+        <a href="javascript:void(0)" id="auth-forgot-link">Forgot password?</a>
+      </div>
+    </div>
+
+    <!-- SIGN UP -->
+    <div class="auth-content" data-auth-content="signup" style="display:none;">
+      <div class="apply-modal__eyebrow">Join the list</div>
+      <h2 class="apply-modal__title">Create <em>account</em></h2>
+      <p class="apply-modal__sub">Save your favorite pieces, track orders, and get first dibs on every drop.</p>
+
+      <div class="auth-social">
+        <button class="auth-social__btn" id="auth-google-signup">
+          <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
+        <button class="auth-social__btn" id="auth-apple-signup">
+          <svg width="18" height="18" viewBox="0 0 14 17" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M11.624 8.74c-.02-2.16 1.764-3.21 1.846-3.26-1.008-1.474-2.575-1.675-3.13-1.696-1.33-.135-2.601.785-3.276.785-.687 0-1.728-.766-2.847-.745-1.464.022-2.815.851-3.567 2.16-1.522 2.638-.387 6.534 1.094 8.674.726 1.05 1.585 2.226 2.717 2.184 1.094-.044 1.51-.708 2.83-.708 1.31 0 1.694.708 2.85.685 1.176-.02 1.92-1.064 2.638-2.121.832-1.215 1.174-2.397 1.187-2.458-.026-.012-2.276-.873-2.298-3.46zM9.475 2.378c.6-.73.999-1.74.892-2.747-.864.036-1.91.575-2.526 1.297-.553.638-1.041 1.668-.91 2.658.964.072 1.946-.49 2.544-1.208z"/></svg>
+          Continue with Apple
+        </button>
+      </div>
+
+      <div class="auth-divider"><span>or</span></div>
+
+      <div class="apply-modal__field-row">
+        <div class="apply-modal__field">
+          <label>First name</label>
+          <input type="text" id="auth-signup-firstname" autocomplete="given-name" />
+        </div>
+        <div class="apply-modal__field">
+          <label>Last name</label>
+          <input type="text" id="auth-signup-lastname" autocomplete="family-name" />
+        </div>
+      </div>
+      <div class="apply-modal__field">
+        <label>Email</label>
+        <input type="email" id="auth-signup-email" autocomplete="email" />
+      </div>
+      <div class="apply-modal__field">
+        <label>Password (8+ characters)</label>
+        <input type="password" id="auth-signup-password" autocomplete="new-password" />
+      </div>
+
+      <button class="apply-modal__submit" id="auth-signup-submit" type="button">Create account →</button>
+      <div class="apply-modal__status" id="auth-signup-status"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- REQUEST ORDER MODAL                         -->
+<!-- ============================================ -->
+<div class="apply-modal" id="request-order-modal">
+  <div class="apply-modal__backdrop" id="request-order-backdrop"></div>
+  <div class="apply-modal__panel request-order-panel">
+    <button class="apply-modal__close" id="request-order-close" aria-label="Close">×</button>
+    <div class="apply-modal__eyebrow">Order Request</div>
+    <h2 class="apply-modal__title">Request your <em>order</em></h2>
+    <p class="apply-modal__sub">Submit your selection — we'll confirm availability and arrange payment within 4 hours via your preferred method.</p>
+
+    <!-- Cart preview (auto-populated) -->
+    <div class="request-order-summary" id="request-order-summary">
+      <!-- Injected by JS: cart line items + total -->
+    </div>
+
+    <div class="apply-modal__field-row">
+      <div class="apply-modal__field">
+        <label>First name</label>
+        <input type="text" id="request-firstname" autocomplete="given-name" />
+      </div>
+      <div class="apply-modal__field">
+        <label>Last name</label>
+        <input type="text" id="request-lastname" autocomplete="family-name" />
+      </div>
+    </div>
+    <div class="apply-modal__field">
+      <label>Email</label>
+      <input type="email" id="request-email" autocomplete="email" />
+    </div>
+    <div class="apply-modal__field">
+      <label>Phone</label>
+      <input type="tel" id="request-phone" autocomplete="tel" />
+    </div>
+    <div class="apply-modal__field">
+      <label>Shipping address</label>
+      <textarea id="request-address" rows="3" placeholder="Street, City, State, Zip" autocomplete="street-address"></textarea>
+    </div>
+    <div class="apply-modal__field">
+      <label>Preferred payment method</label>
+      <select id="request-payment" class="request-order-select">
+        <option value="">Select payment method...</option>
+        <option value="Cash App">Cash App</option>
+        <option value="Zelle">Zelle</option>
+        <option value="Venmo">Venmo</option>
+        <option value="Apple Pay">Apple Pay</option>
+        <option value="Wire transfer">Wire transfer (wholesale)</option>
+        <option value="Whatever's easiest">Whatever's easiest for you</option>
+      </select>
+    </div>
+    <div class="apply-modal__field">
+      <label>Notes (optional)</label>
+      <textarea id="request-notes" rows="2" placeholder="Bulk discount inquiry, deadline, special requests..."></textarea>
+    </div>
+
+    <button class="apply-modal__submit" id="request-order-submit" type="button">Submit Order Request →</button>
+    <div class="apply-modal__status" id="request-order-status"></div>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- SEARCH OVERLAY                              -->
+<!-- ============================================ -->
+<div class="search-overlay" id="search-overlay">
+  <div class="search-overlay__backdrop" id="search-overlay-backdrop"></div>
+  <div class="search-overlay__panel">
+    <div class="search-overlay__bar">
+      <svg class="search-overlay__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="m21 21-4.3-4.3"/>
+      </svg>
+      <input
+        type="text"
+        class="search-overlay__input"
+        id="search-overlay-input"
+        placeholder="Search products, brands, sizes…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="search-overlay__close" id="search-overlay-close" aria-label="Close">ESC</button>
+    </div>
+
+    <div class="search-overlay__results" id="search-overlay-results">
+      <!-- Results injected by JS -->
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- WHOLESALE RIBBON (visible only when authed)  -->
+<!-- ============================================ -->
+<div class="wholesale-ribbon" id="wholesale-ribbon">
+  Wholesale Mode Active <span class="wholesale-ribbon__exit" id="wholesale-exit">Exit Wholesale</span>
+</div>
+
+
+<!-- ============================================ -->
+<!-- HEADER + ISOLATED SEARCH                    -->
+<!-- ============================================ -->
+<header class="header">
+  <div class="header__top">
+    <div class="header__brand">
+      <a href="javascript:void(0)" class="header__logo" data-nav="home">
+        <img class="logo-img" alt="Shopped By Thread" data-logo>
+      </a>
+      <a href="javascript:void(0)" class="header__wholesale" id="header-wholesale">
+        <span class="header__wholesale-dot"></span>
+        <span class="header__wholesale-text">Wholesale</span>
+      </a>
+    </div>
+
+    <!-- Isolated search bubble -->
+    <div class="search" id="search-trigger" tabindex="0" role="button" aria-label="Open search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="m21 21-4.3-4.3"/>
+      </svg>
+      <input type="text" placeholder="Search products, brands, sizes…" readonly />
+      <span class="search__hint">⌘K</span>
+    </div>
+
+    <div class="header__icons">
+      <a href="javascript:void(0)" id="header-account-link">Account</a>
+      <a href="javascript:void(0)" id="header-account-loggedin" style="display:none;">
+        <span class="header__avatar" id="header-avatar"></span>
+        <span id="header-account-name">Account</span>
+      </a>
+      <a href="javascript:void(0)" data-nav="cart">Cart <span class="header__cart-count">[0]</span></a>
+    </div>
+  </div>
+
+  <!-- Horizontal category nav + Brands dropdown -->
+  <nav class="brandbar">
+    <a href="javascript:void(0)" data-nav="home">All</a>
+    <a href="javascript:void(0)" data-nav="category" data-category="tees">Tees</a>
+    <a href="javascript:void(0)" data-nav="category" data-category="hoodies-sweats">Hoodies &amp; Sweats</a>
+    <a href="javascript:void(0)" data-nav="category" data-category="bottoms">Bottoms</a>
+    <a href="javascript:void(0)" data-nav="category" data-category="footwear">Footwear</a>
+    <a href="javascript:void(0)" data-nav="category" data-category="accessories">Accessories</a>
+    <a href="javascript:void(0)" class="brandbar__brands-trigger" id="brands-trigger">Brands <span class="brandbar__caret">▾</span></a>
+  </nav>
+  <div class="brands-dropdown" id="brands-dropdown" aria-hidden="true">
+    <div class="brands-dropdown__grid" id="brands-dropdown-grid">
+      <!-- Injected by JS from BRANDS, alphabetical with letter dividers -->
+    </div>
+  </div>
+</header>
+
+
+<!-- Marquee announcement (subtle gold accent) -->
+<div class="marquee">
+  <div class="marquee__track">
+    <span>NEW ARRIVALS WEEKLY</span><span class="dot">●</span>
+    <span>FREE SHIPPING OVER $300</span><span class="dot">●</span>
+    <span>BRAND NEW WITH TAGS ONLY</span><span class="dot">●</span>
+    <span>AUTHENTICATED BY SHOPPED BY THREAD</span><span class="dot">●</span>
+    <span>WHOLESALE INQUIRIES WELCOME</span><span class="dot">●</span>
+    <span>NEW ARRIVALS WEEKLY</span><span class="dot">●</span>
+    <span>FREE SHIPPING OVER $300</span><span class="dot">●</span>
+    <span>BRAND NEW WITH TAGS ONLY</span><span class="dot">●</span>
+    <span>AUTHENTICATED BY SHOPPED BY THREAD</span><span class="dot">●</span>
+    <span>WHOLESALE INQUIRIES WELCOME</span><span class="dot">●</span>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- HOME VIEW                                   -->
+<!-- ============================================ -->
+<div id="view-home" class="view view--active">
+
+<!-- ============================================ -->
+<!-- HERO (Karmaloop-style featured center)      -->
+<!-- ============================================ -->
+<section class="hero">
+  <div class="hero__grid">
+    <div class="hero__main hero-tile" data-nav="brand" data-brand="hellstar" role="link" tabindex="0" aria-label="Shop Hellstar Records Vol. III">
+      <img class="hero__bg-img" src="assets/images/image-22-6d3c9b698d2d3f1b.jpg" alt="Hellstar">
+      <div class="hero__content">
+        <div class="hero__tag">Featured Drop</div>
+        <div>
+          <h2 class="hero__title">Hellstar<br>Records<br><em>Vol. III</em></h2>
+          <div class="hero__bottom">
+            <p class="hero__meta">Curated drops · sizes S–XXL · authenticated stock — brand new with tags</p>
+            <span class="hero__cta">Shop now →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero__side">
+      <div class="hero__side-top hero-tile" data-nav="brand" data-brand="denim-tears" role="link" tabindex="0" aria-label="Shop Denim Tears">
+        <img class="hero__bg-img" src="assets/images/image-23-3411154f2ef29fd5.jpg" alt="Denim Tears" style="object-position: center 25%;">
+        <div class="hero__content">
+          <div class="hero__tag">Just in</div>
+          <div>
+            <h3 class="hero__title">Denim<br><em>Tears</em></h3>
+            <span class="hero__cta">View →</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero__side-bot hero-tile" data-nav="brand" data-brand="chrome-hearts" role="link" tabindex="0" aria-label="Enter The Grail Vault">
+        <img class="hero__bg-img" src="assets/images/image-24-aeaa42a0f6ce42e6.jpg" alt="Grails" style="object-position: center 35%;">
+        <div class="hero__content">
+          <div class="hero__tag">Grails</div>
+          <div>
+            <h3 class="hero__title">The Grail<br><em>Vault</em></h3>
+            <span class="hero__cta">Enter →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================ -->
+<!-- BRAND GRID                                  -->
+<!-- ============================================ -->
+<section class="section">
+  <div class="section__head">
+    <h2 class="section__title">Shop by <em>Brand</em></h2>
+    <a href="javascript:void(0)" class="section__link" data-nav="brands">All brands →</a>
+  </div>
+
+  <div class="brands">
+    <div class="brand-tile brand-tile--has-logo">
+      <span class="brand-tile__count">24 pieces</span>
+      <div class="brand-tile__logo">
+        <img src="assets/images/image-25-70084ffbfc344ad2.png" alt="Hellstar">
+      </div>
+      <span class="brand-tile__name">Hellstar</span>
+      <span class="brand-tile__arrow">→</span>
+    </div>
+    <div class="brand-tile brand-tile--has-logo brand-tile--keep-color">
+      <span class="brand-tile__count">18 pieces</span>
+      <div class="brand-tile__logo">
+        <img src="assets/images/image-26-8c07839267d9ad7e.png" alt="Denim Tears">
+      </div>
+      <span class="brand-tile__name">Denim Tears</span>
+      <span class="brand-tile__arrow">→</span>
+    </div>
+    <div class="brand-tile brand-tile--has-logo">
+      <span class="brand-tile__count">31 pieces</span>
+      <div class="brand-tile__logo">
+        <img src="assets/images/image-27-4ad2cd4289757c79.png" alt="Corteiz">
+      </div>
+      <span class="brand-tile__name">Corteiz</span>
+      <span class="brand-tile__arrow">→</span>
+    </div>
+    <div class="brand-tile brand-tile--has-logo">
+      <span class="brand-tile__count">9 pieces</span>
+      <div class="brand-tile__logo">
+        <img src="assets/images/image-28-760de2368bb9a2a3.png" alt="Chrome Hearts">
+      </div>
+      <span class="brand-tile__name">Chrome Hearts</span>
+      <span class="brand-tile__arrow">→</span>
+    </div>
+    <div class="brand-tile brand-tile--has-logo">
+      <span class="brand-tile__count">14 pieces</span>
+      <div class="brand-tile__logo">
+        <img src="assets/images/image-29-fa9e58becbf00677.png" alt="Stüssy">
+      </div>
+      <span class="brand-tile__name">Stüssy</span>
+      <span class="brand-tile__arrow">→</span>
+    </div>
+    <div class="brand-tile brand-tile--has-logo">
+      <span class="brand-tile__count">22 pieces</span>
+      <div class="brand-tile__logo">
+        <img src="assets/images/image-30-3e4404f4b07a3773.png" alt="Sp5der">
+      </div>
+      <span class="brand-tile__name">Sp5der</span>
+      <span class="brand-tile__arrow">→</span>
+    </div>
+    <div class="brand-tile brand-tile--has-logo brand-tile--keep-color">
+      <span class="brand-tile__count">11 pieces</span>
+      <div class="brand-tile__logo">
+        <img src="assets/images/image-31-7909cc68a16444d6.png" alt="Supreme">
+      </div>
+      <span class="brand-tile__name">Supreme</span>
+      <span class="brand-tile__arrow">→</span>
+    </div>
+    <div class="brand-tile brand-tile--has-logo">
+      <span class="brand-tile__count">16 pieces</span>
+      <div class="brand-tile__logo">
+        <img src="assets/images/image-32-f94d1d359e9d1a5e.png" alt="Bape">
+      </div>
+      <span class="brand-tile__name">Bape</span>
+      <span class="brand-tile__arrow">→</span>
+    </div>
+    <div class="brand-tile brand-tile--has-logo brand-tile--keep-color">
+      <span class="brand-tile__count">8 pieces</span>
+      <div class="brand-tile__logo">
+        <img src="assets/images/image-33-0b0bf34772a63e4c.png" alt="Rhude">
+      </div>
+      <span class="brand-tile__name">Rhude</span>
+      <span class="brand-tile__arrow">→</span>
+    </div>
+    <div class="brand-tile brand-tile--has-logo">
+      <span class="brand-tile__count">19 pieces</span>
+      <div class="brand-tile__logo">
+        <img src="assets/images/image-34-eecb659785116f66.png" alt="Palm Angels">
+      </div>
+      <span class="brand-tile__name">Palm Angels</span>
+      <span class="brand-tile__arrow">→</span>
+    </div>
+    <div class="brand-tile brand-tile--has-logo">
+      <span class="brand-tile__count">27 pieces</span>
+      <div class="brand-tile__logo">
+        <img src="assets/images/image-35-7365b9c7696e8174.png" alt="Kith">
+      </div>
+      <span class="brand-tile__name">Kith</span>
+      <span class="brand-tile__arrow">→</span>
+    </div>
+    <div class="brand-tile">
+      <span class="brand-tile__count">All</span>
+      <span class="brand-tile__name">View all →</span>
+      <span class="brand-tile__arrow"></span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================ -->
+<!-- NEW DROPS CAROUSEL                          -->
+<!-- ============================================ -->
+<section class="section">
+  <div class="section__head">
+    <h2 class="section__title">New <em>Drops</em></h2>
+    <a href="javascript:void(0)" class="section__link">View all</a>
+  </div>
+
+  <div class="carousel" id="drops-carousel">
+    <button class="carousel__nav carousel__nav--prev" id="drops-prev" aria-label="Previous">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+    <div class="carousel__viewport">
+      <div class="carousel__track" id="drops-track">
+        <!-- Slides injected by JS -->
+      </div>
+    </div>
+    <button class="carousel__nav carousel__nav--next" id="drops-next" aria-label="Next">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+  </div>
+  <div class="carousel__progress" id="drops-progress"><!-- dots injected by JS --></div>
+</section>
+
+
+<!-- ============================================ -->
+<!-- EDITORIAL STRIP                             -->
+<!-- ============================================ -->
+<section class="editorial">
+  <div>
+    <h2 class="editorial__title">Every piece, <em>verified</em>.</h2>
+    <p class="editorial__body">No replicas. No bait-and-switch. Every garment that comes through Shopped By Thread is hand-checked, photographed in-house, and verified before it's listed. Every piece is brand new with tags — never worn, never used, sealed and ready for you.</p>
+    <a href="javascript:void(0)" class="editorial__cta" data-nav="authentication">Read our verification process →</a>
+  </div>
+  <div class="editorial__visual">
+    <img class="logo-img" alt="Shopped By Thread" data-logo>
+  </div>
+</section>
+
+</div><!-- /#view-home -->
+
+
+<!-- ============================================ -->
+<!-- BRAND PAGE VIEW                             -->
+<!-- ============================================ -->
+<div id="view-brand" class="view">
+  <div class="crumbs">
+    <a data-nav="home">Home</a>
+    <span class="sep">/</span>
+    <a data-nav="home">Brands</a>
+    <span class="sep">/</span>
+    <span class="crumbs__current" id="brand-crumb">Hellstar</span>
+  </div>
+
+  <div class="brand-hero">
+    <h1 class="brand-hero__name" id="brand-name">Hellstar</h1>
+    <div class="brand-hero__meta">
+      <span class="brand-hero__count" id="brand-count">24</span>
+      Pieces in stock
+    </div>
+    <p class="brand-hero__desc" id="brand-desc">
+      Founded in Los Angeles in 2020, Hellstar Studios fuses cosmic graphics with elevated heavyweight construction. Every piece authenticated and graded before listing.
+    </p>
+  </div>
+
+  <div class="filters">
+    <div class="filters__group">
+      <div class="filter-pill" id="filter-sort">
+        <span class="filter-pill__label">Sort: </span><span id="filter-sort-value">Newest</span> <span class="filter-pill__caret">▾</span>
+        <div class="filter-dropdown" id="filter-sort-dropdown">
+          <button data-sort="newest">Newest</button>
+          <button data-sort="price-low">Price: Low to High</button>
+          <button data-sort="price-high">Price: High to Low</button>
+          <button data-sort="name">Name: A → Z</button>
+        </div>
+      </div>
+      <div class="filter-pill" id="filter-size">
+        <span id="filter-size-value">Size</span> <span class="filter-pill__caret">▾</span>
+        <div class="filter-dropdown" id="filter-size-dropdown">
+          <button data-size="">All sizes</button>
+          <button data-size="S">Small</button>
+          <button data-size="M">Medium</button>
+          <button data-size="L">Large</button>
+          <button data-size="XL">X-Large</button>
+        </div>
+      </div>
+      <div class="filter-pill" id="filter-price">
+        <span id="filter-price-value">Price</span> <span class="filter-pill__caret">▾</span>
+        <div class="filter-dropdown" id="filter-price-dropdown">
+          <button data-price="">All prices</button>
+          <button data-price="0-200">Under $200</button>
+          <button data-price="200-400">$200 — $400</button>
+          <button data-price="400-600">$400 — $600</button>
+          <button data-price="600-99999">$600+</button>
+        </div>
+      </div>
+      <button class="filter-pill active" id="filter-stock">In stock</button>
+    </div>
+    <div class="filters__count" id="brand-filter-count">24 results</div>
+  </div>
+
+  <div class="brand-products" id="brand-product-grid">
+    <!-- Injected by JS -->
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- CATEGORY VIEW (Deploy 2)                    -->
+<!-- ============================================ -->
+<div id="view-category" class="view">
+  <div class="crumbs">
+    <a data-nav="home">Home</a>
+    <span class="sep">/</span>
+    <span class="crumbs__current" id="category-crumb">Tees</span>
+  </div>
+
+  <div class="brand-hero">
+    <h1 class="brand-hero__name" id="category-name">Tees</h1>
+    <div class="brand-hero__meta">
+      <span class="brand-hero__count" id="category-count">0</span>
+      Pieces in stock
+    </div>
+    <p class="brand-hero__desc" id="category-desc"></p>
+  </div>
+
+  <div class="filters">
+    <div class="filters__group">
+      <div class="filter-pill" id="cat-filter-sort">
+        <span class="filter-pill__label">Sort: </span><span id="cat-filter-sort-value">Newest</span> <span class="filter-pill__caret">▾</span>
+        <div class="filter-dropdown" id="cat-filter-sort-dropdown">
+          <button data-sort="newest">Newest</button>
+          <button data-sort="price-low">Price: Low to High</button>
+          <button data-sort="price-high">Price: High to Low</button>
+          <button data-sort="name">Name: A → Z</button>
+        </div>
+      </div>
+      <div class="filter-pill" id="cat-filter-size">
+        <span id="cat-filter-size-value">Size</span> <span class="filter-pill__caret">▾</span>
+        <div class="filter-dropdown" id="cat-filter-size-dropdown">
+          <button data-size="">All sizes</button>
+          <button data-size="S">Small</button>
+          <button data-size="M">Medium</button>
+          <button data-size="L">Large</button>
+          <button data-size="XL">X-Large</button>
+        </div>
+      </div>
+      <div class="filter-pill" id="cat-filter-price">
+        <span id="cat-filter-price-value">Price</span> <span class="filter-pill__caret">▾</span>
+        <div class="filter-dropdown" id="cat-filter-price-dropdown">
+          <button data-price="">All prices</button>
+          <button data-price="0-200">Under $200</button>
+          <button data-price="200-400">$200 — $400</button>
+          <button data-price="400-600">$400 — $600</button>
+          <button data-price="600-99999">$600+</button>
+        </div>
+      </div>
+      <button class="filter-pill active" id="cat-filter-stock">In stock</button>
+    </div>
+    <div class="filters__count" id="category-filter-count">0 results</div>
+  </div>
+
+  <div class="brand-products" id="category-product-grid">
+    <!-- Injected by JS -->
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- PRODUCT DETAIL VIEW                         -->
+<!-- ============================================ -->
+<div id="view-product" class="view">
+  <div class="crumbs">
+    <a data-nav="home">Home</a>
+    <span class="sep">/</span>
+    <a data-nav="brand" id="pd-crumb-brand">Hellstar</a>
+    <span class="sep">/</span>
+    <span class="crumbs__current" id="pd-crumb-name">Records Vol. III Hoodie</span>
+  </div>
+
+  <div class="pd">
+    <div class="pd__gallery">
+      <div class="pd__main pd__main--charcoal" id="pd-main">
+        <div class="pd__main-img" id="pd-main-img">Hellstar</div>
+      </div>
+    </div>
+
+    <div class="pd__info">
+      <a class="pd__brand" id="pd-brand" data-nav="brand">Hellstar</a>
+      <h1 class="pd__name" id="pd-name">Records Vol. III Hoodie</h1>
+
+      <div class="pd__price-row">
+        <span class="pd__price" id="pd-price">$385</span>
+        <span class="pd__price-was" id="pd-price-was" style="display:none"></span>
+        <span class="pd__cond-pill" id="pd-cond">Brand New / Tagged</span>
+      </div>
+      <div class="pd__wholesale-tease" id="pd-wholesale-tease"></div>
+      <div class="pd__wholesale-nudge" id="pd-wholesale-nudge" style="display:none"></div>
+
+      <div class="pd__section">
+        <div class="pd__section-title">
+          <span>Select size</span>
+          <a href="javascript:void(0)" id="pd-size-guide-link">Size guide</a>
+        </div>
+        <div class="pd__sizes" id="pd-sizes">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+
+      <button class="pd__add" id="pd-add" disabled>Select a size</button>
+
+      <p class="pd__description" id="pd-description">
+        From the third volume of Hellstar's seminal Records series. Heavyweight French terry construction, oversized box fit, with the signature dual-print graphic on chest and back. Authenticated and graded by Shopped By Thread.
+      </p>
+
+      <div class="pd__accordion">
+        <div class="pd__accordion-item open">
+          <button class="pd__accordion-trigger">Authentication</button>
+          <div class="pd__accordion-content">
+            Every Shopped By Thread piece is hand-checked against verified references. Tags, stitching, hardware, and material composition are all examined before listing. This piece comes with our authenticity guarantee.
+          </div>
+        </div>
+        <div class="pd__accordion-item">
+          <button class="pd__accordion-trigger" id="pd-cond-trigger">Condition · Brand New / Tagged</button>
+          <div class="pd__accordion-content" id="pd-cond-content">
+            Item is brand new with original tags attached. No flaws, defects, or signs of wear. Stored in archival conditions.
+          </div>
+        </div>
+        <div class="pd__accordion-item">
+          <button class="pd__accordion-trigger">Shipping & Returns</button>
+          <div class="pd__accordion-content">
+            Free shipping on orders over $300 within the US. Worldwide shipping calculated at checkout. Returns accepted within 7 days for unworn items, original tags attached.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="pd__related">
+    <div class="section__head">
+      <h2 class="section__title">You might <em>also</em> like</h2>
+    </div>
+    <div class="products" id="pd-related-grid">
+      <!-- Injected by JS -->
+    </div>
+  </section>
+</div>
+
+
+<!-- ============================================ -->
+<!-- CART VIEW                                   -->
+<!-- ============================================ -->
+<div id="view-cart" class="view">
+  <div class="cart-page">
+    <div class="cart-page__head">
+      <h1 class="cart-page__title">Your <em>cart</em></h1>
+      <span class="cart-page__count" id="cart-page-count">0 items</span>
+    </div>
+
+    <div class="cart-page__grid" id="cart-grid">
+      <!-- Injected by JS based on cart state -->
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- ALL BRANDS VIEW                             -->
+<!-- ============================================ -->
+<div id="view-brands" class="view">
+  <div class="brands-page">
+    <div class="crumbs">
+      <a data-nav="home">Home</a>
+      <span class="sep">/</span>
+      <span class="crumbs__current">All Brands</span>
+    </div>
+
+    <div class="brands-page__head">
+      <div>
+        <div class="brands-page__eyebrow">The Roster</div>
+        <h1 class="brands-page__title">All <em>brands</em></h1>
+        <p class="brands-page__sub">Every label we carry, hand-picked. From archival pieces to the latest drops.</p>
+      </div>
+      <div class="brands-page__count" id="brands-page-count">— brands</div>
+    </div>
+
+    <div class="brands brands--full" id="brands-page-grid">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- ACCOUNT VIEW                                -->
+<!-- ============================================ -->
+<div id="view-account" class="view">
+  <div class="account-page">
+    <div class="crumbs">
+      <a data-nav="home">Home</a>
+      <span class="sep">/</span>
+      <span class="crumbs__current">Account</span>
+    </div>
+
+    <div class="account-page__head">
+      <div>
+        <div class="account-page__eyebrow">Welcome back</div>
+        <h1 class="account-page__title" id="account-name">Your <em>account</em></h1>
+        <div class="account-page__email" id="account-email">—</div>
+      </div>
+      <button class="account-page__signout" id="account-signout">Sign out</button>
+    </div>
+
+    <div class="account-grid">
+      <!-- Profile -->
+      <div class="account-card">
+        <div class="account-card__head">
+          <h3 class="account-card__title">Profile</h3>
+          <button class="account-card__action" id="account-manage-profile">Manage →</button>
+        </div>
+        <div class="account-card__body">
+          <div class="account-row">
+            <span class="account-row__label">Name</span>
+            <span class="account-row__value" id="account-fullname">—</span>
+          </div>
+          <div class="account-row">
+            <span class="account-row__label">Email</span>
+            <span class="account-row__value" id="account-email-detail">—</span>
+          </div>
+          <div class="account-row">
+            <span class="account-row__label">Member since</span>
+            <span class="account-row__value" id="account-member-since">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wholesale Status -->
+      <div class="account-card">
+        <div class="account-card__head">
+          <h3 class="account-card__title">Wholesale</h3>
+          <span class="account-card__badge" id="account-wholesale-badge">Retail</span>
+        </div>
+        <div class="account-card__body" id="account-wholesale-body">
+          <p class="account-card__text">You're browsing as a retail customer. Apply for wholesale access to unlock bulk pricing across the catalog.</p>
+          <button class="account-card__action account-card__action--primary" id="account-apply-wholesale">Apply for access →</button>
+        </div>
+      </div>
+
+      <!-- Order History -->
+      <div class="account-card account-card--span">
+        <div class="account-card__head">
+          <h3 class="account-card__title">Order history</h3>
+          <span class="account-card__badge">0 orders</span>
+        </div>
+        <div class="account-card__body account-card__body--empty">
+          <p class="account-card__text">No orders yet — once you make your first purchase, your orders will appear here with shipping updates and receipts.</p>
+          <button class="account-card__action" data-nav="home">Start shopping →</button>
+        </div>
+      </div>
+
+      <!-- Saved Pieces -->
+      <div class="account-card">
+        <div class="account-card__head">
+          <h3 class="account-card__title">Saved pieces</h3>
+          <span class="account-card__badge">0 saved</span>
+        </div>
+        <div class="account-card__body account-card__body--empty">
+          <p class="account-card__text">Save pieces you love to find them quickly later. Tap the bookmark icon on any product to save it.</p>
+        </div>
+      </div>
+
+      <!-- Addresses -->
+      <div class="account-card">
+        <div class="account-card__head">
+          <h3 class="account-card__title">Addresses</h3>
+          <button class="account-card__action" id="account-add-address">Add address +</button>
+        </div>
+        <div class="account-card__body account-card__body--empty">
+          <p class="account-card__text">No saved addresses yet. Save shipping addresses for faster checkout.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- ABOUT VIEW                                  -->
+<!-- ============================================ -->
+<div id="view-about" class="view">
+  <div class="content-page">
+    <div class="crumbs">
+      <a data-nav="home">Home</a>
+      <span class="sep">/</span>
+      <span class="crumbs__current">About</span>
+    </div>
+
+    <header class="content-page__head">
+      <div class="content-page__eyebrow">Founded 2026 · Las Vegas</div>
+      <h1 class="content-page__title">Shopped By <em>Thread</em></h1>
+      <p class="content-page__lede">An independent streetwear curator built around a single principle: every piece is brand new, hand-checked, and worth the price you pay for it.</p>
+    </header>
+
+    <section class="content-page__body">
+      <div class="content-page__col">
+        <h2 class="content-page__h2">The story</h2>
+        <p>Shopped By Thread started where most good things in streetwear start — as a personal obsession. Sourcing rare drops, tracking release calendars, building relationships with the people who actually move pieces from production to your closet without anything getting watered down in between.</p>
+        <p>What was a private hunt became a quiet operation: moving authenticated, brand-new pieces from <strong>Hellstar</strong>, <strong>Denim Tears</strong>, <strong>Sp5der</strong>, <strong>Bape</strong>, <strong>Supreme</strong>, <strong>Chrome Hearts</strong>, and the labels that matter — to people who care about the difference between an actual piece and a knockoff.</p>
+        <p>No replicas. No "good condition." No stories. Just verified inventory from the brands shaping the culture.</p>
+      </div>
+
+      <div class="content-page__col">
+        <h2 class="content-page__h2">What we carry</h2>
+        <p>Every piece in our catalog is <strong>brand new with original tags attached</strong>. We don't sell pre-owned, vintage, or "deadstock" with vague provenance. If it's listed here, it's been hand-checked and arrives sealed.</p>
+        <p>Our roster shifts with culture. We focus on the labels that hold value beyond hype cycles — pieces from designers and houses that real collectors actually wear. When something drops that doesn't meet our standard, it doesn't get listed.</p>
+
+        <h2 class="content-page__h2">For wholesale</h2>
+        <p>We work with boutiques, resellers, and stylists looking for verified inventory at scale. Wholesale clients get bulk pricing, priority on rare drops, and a direct line for sourcing requests.</p>
+        <a href="javascript:void(0)" class="content-page__cta" id="about-wholesale-cta">Apply for wholesale access →</a>
+      </div>
+    </section>
+
+    <section class="content-page__cta-block">
+      <div class="content-page__cta-eyebrow">Get on the list</div>
+      <h2 class="content-page__cta-title">20% off your <em>first piece</em></h2>
+      <p>Subscribe and get a welcome discount on your first order, plus first access to every drop before it goes public.</p>
+      <a href="javascript:void(0)" class="content-page__cta" data-nav="home">Browse the catalog →</a>
+    </section>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- CONTACT VIEW                                -->
+<!-- ============================================ -->
+<div id="view-contact" class="view">
+  <div class="content-page">
+    <div class="crumbs">
+      <a data-nav="home">Home</a>
+      <span class="sep">/</span>
+      <span class="crumbs__current">Contact</span>
+    </div>
+
+    <header class="content-page__head">
+      <div class="content-page__eyebrow">We respond within 4 hours</div>
+      <h1 class="content-page__title">Get in <em>touch</em></h1>
+      <p class="content-page__lede">Questions about a piece, your order, wholesale, press — anything. Send us a message and we'll get back to you fast.</p>
+    </header>
+
+    <section class="content-page__body content-page__body--contact">
+      <div class="content-page__col content-page__col--info">
+        <div class="contact-info">
+          <div class="contact-info__label">Email</div>
+          <a href="mailto:contact@shoppedbythread.com" class="contact-info__value">contact@shoppedbythread.com</a>
+        </div>
+        <div class="contact-info">
+          <div class="contact-info__label">Instagram</div>
+          <a href="https://instagram.com/shoppedbythread" target="_blank" rel="noopener" class="contact-info__value">@shoppedbythread</a>
+        </div>
+        <div class="contact-info">
+          <div class="contact-info__label">Location</div>
+          <div class="contact-info__value">Las Vegas, NV</div>
+        </div>
+        <div class="contact-info">
+          <div class="contact-info__label">Hours</div>
+          <div class="contact-info__value">Mon–Sat · 10am–8pm PST</div>
+        </div>
+      </div>
+
+      <div class="content-page__col content-page__col--form">
+        <div class="contact-form">
+          <div class="apply-modal__field">
+            <label>Your name</label>
+            <input type="text" id="contact-name" autocomplete="name" />
+          </div>
+          <div class="apply-modal__field">
+            <label>Email</label>
+            <input type="email" id="contact-email" autocomplete="email" />
+          </div>
+          <div class="apply-modal__field">
+            <label>Subject</label>
+            <select id="contact-subject" class="request-order-select">
+              <option value="">Select a topic...</option>
+              <option value="General">General inquiry</option>
+              <option value="Order question">Order question</option>
+              <option value="Wholesale">Wholesale</option>
+              <option value="Press">Press / collaboration</option>
+              <option value="Other">Something else</option>
+            </select>
+          </div>
+          <div class="apply-modal__field">
+            <label>Message</label>
+            <textarea id="contact-message" rows="5"></textarea>
+          </div>
+          <button class="apply-modal__submit" id="contact-submit" type="button">Send message →</button>
+          <div class="apply-modal__status" id="contact-status"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- PRIVACY POLICY VIEW                         -->
+<!-- ============================================ -->
+<div id="view-privacy" class="view">
+  <div class="content-page content-page--legal">
+    <div class="crumbs">
+      <a data-nav="home">Home</a>
+      <span class="sep">/</span>
+      <span class="crumbs__current">Privacy</span>
+    </div>
+
+    <header class="content-page__head">
+      <div class="content-page__eyebrow">Last updated · May 2026</div>
+      <h1 class="content-page__title">Privacy <em>Policy</em></h1>
+    </header>
+
+    <section class="legal-body">
+      <p class="legal-intro">This policy explains how Shopped By Thread collects, uses, and protects your personal information. By using our site, you agree to these practices.</p>
+
+      <h2>Information we collect</h2>
+      <p>When you use our site, we may collect:</p>
+      <ul>
+        <li><strong>Contact information</strong> — name, email, phone number, and shipping address when you submit an order request, sign up for our list, or apply for wholesale.</li>
+        <li><strong>Account information</strong> — if you create an account, we store your name and email through our authentication provider (Clerk).</li>
+        <li><strong>Usage data</strong> — basic information about how you browse our site, including pages viewed and items added to cart.</li>
+      </ul>
+
+      <h2>How we use your information</h2>
+      <ul>
+        <li>To process and fulfill your order requests</li>
+        <li>To send you marketing communications about new drops (only if you've subscribed)</li>
+        <li>To respond to your inquiries and provide customer support</li>
+        <li>To improve our site and the products we offer</li>
+        <li>To prevent fraud and protect our customers</li>
+      </ul>
+
+      <h2>Third-party services</h2>
+      <p>We use trusted third-party providers to run our site:</p>
+      <ul>
+        <li><strong>Formspree</strong> — handles email form submissions</li>
+        <li><strong>Clerk</strong> — manages user accounts and authentication</li>
+        <li><strong>Vercel</strong> — hosts our website</li>
+      </ul>
+      <p>These providers have their own privacy policies and only access the information they need to provide their services.</p>
+
+      <h2>Cookies</h2>
+      <p>We use minimal cookies — primarily for session management and authentication. We don't use third-party advertising cookies or sell your data.</p>
+
+      <h2>Your rights</h2>
+      <p>You have the right to:</p>
+      <ul>
+        <li>Request a copy of your personal information we hold</li>
+        <li>Request that we delete your data</li>
+        <li>Opt out of marketing communications at any time</li>
+        <li>Update or correct any inaccurate information</li>
+      </ul>
+      <p>To exercise any of these rights, email us at <a href="mailto:contact@shoppedbythread.com">contact@shoppedbythread.com</a>.</p>
+
+      <h2>Data security</h2>
+      <p>We take reasonable measures to protect your personal information from unauthorized access, alteration, or disclosure. However, no online transmission is 100% secure, and we cannot guarantee absolute security.</p>
+
+      <h2>Changes to this policy</h2>
+      <p>We may update this policy from time to time. The "last updated" date at the top of this page indicates when changes were made. We encourage you to review this policy periodically.</p>
+
+      <h2>Contact</h2>
+      <p>Questions about this policy? Email <a href="mailto:contact@shoppedbythread.com">contact@shoppedbythread.com</a>.</p>
+    </section>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- TERMS OF SERVICE VIEW                       -->
+<!-- ============================================ -->
+<div id="view-terms" class="view">
+  <div class="content-page content-page--legal">
+    <div class="crumbs">
+      <a data-nav="home">Home</a>
+      <span class="sep">/</span>
+      <span class="crumbs__current">Terms</span>
+    </div>
+
+    <header class="content-page__head">
+      <div class="content-page__eyebrow">Last updated · May 2026</div>
+      <h1 class="content-page__title">Terms of <em>Service</em></h1>
+    </header>
+
+    <section class="legal-body">
+      <p class="legal-intro">By using shoppedbythread.com, you agree to these terms. Please read them carefully.</p>
+
+      <h2>About this site</h2>
+      <p>Shopped By Thread is a curated streetwear catalog. Our site allows you to browse our inventory and submit order requests. We don't process payments through the site directly — instead, we contact you within 4 hours of receiving an order request to confirm availability and arrange payment via your preferred method (Cash App, Zelle, Venmo, Apple Pay, wire transfer).</p>
+
+      <h2>Order process</h2>
+      <ul>
+        <li>You submit an order request through our site with the items, sizes, and contact information.</li>
+        <li>We verify the items are in stock and reach out to confirm availability.</li>
+        <li>We send you payment instructions for your selected payment method.</li>
+        <li>Once payment is received, we ship your order within 1–2 business days.</li>
+      </ul>
+
+      <h2>Authenticity guarantee</h2>
+      <p>Every piece sold on Shopped By Thread is brand new with original tags attached and sourced from verified channels. If you receive a piece that you believe is inauthentic, contact us within 7 days of receipt for a full refund and return shipping reimbursement.</p>
+
+      <h2>Pricing and availability</h2>
+      <p>Prices listed are in US dollars. Wholesale clients receive 35% off retail when wholesale mode is active. Inventory is limited and shown availability may change between when you view a piece and when you submit a request — we'll always confirm availability before requesting payment.</p>
+
+      <h2>Shipping</h2>
+      <p>We ship within the United States and offer free shipping on orders over $300. International shipping is available on request — contact us for a quote. Once your order ships, we'll send you tracking information via email.</p>
+
+      <h2>Returns and exchanges</h2>
+      <p>Due to the curated nature of our inventory, all sales are final unless the piece is misrepresented or damaged in transit. If there's an issue with your order, contact us within 7 days of receipt and we'll make it right.</p>
+
+      <h2>Intellectual property</h2>
+      <p>All content on this site — including the Shopped By Thread name, logo, photography, and editorial copy — is our property. You may not reproduce, distribute, or use any of this content without our written permission.</p>
+      <p>Brand names, logos, and product images shown on this site are the property of their respective owners. Their inclusion does not imply endorsement.</p>
+
+      <h2>User accounts</h2>
+      <p>If you create an account, you're responsible for keeping your login credentials secure. You're responsible for all activity that happens under your account. Notify us immediately if you suspect unauthorized access.</p>
+
+      <h2>Disclaimer</h2>
+      <p>Our site and services are provided "as is" without warranties of any kind. We don't guarantee that the site will always be available or error-free. To the fullest extent permitted by law, we disclaim all warranties.</p>
+
+      <h2>Limitation of liability</h2>
+      <p>Shopped By Thread is not liable for any indirect, incidental, or consequential damages arising from your use of our site or services. Our total liability for any claim related to your order is limited to the amount you paid for that order.</p>
+
+      <h2>Changes to these terms</h2>
+      <p>We may update these terms from time to time. Continued use of the site after changes constitutes acceptance of the updated terms.</p>
+
+      <h2>Contact</h2>
+      <p>Questions about these terms? Email <a href="mailto:contact@shoppedbythread.com">contact@shoppedbythread.com</a>.</p>
+    </section>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- AUTHENTICATION VIEW                         -->
+<!-- ============================================ -->
+<div id="view-authentication" class="view">
+  <div class="auth-page-v2">
+    <div class="crumbs">
+      <a data-nav="home">Home</a>
+      <span class="sep">/</span>
+      <span class="crumbs__current">Authentication</span>
+    </div>
+
+    <!-- HERO with Fraunces editorial typography -->
+    <header class="auth-hero">
+      <div class="auth-hero__tag">★ AUTHENTICATED BY SHOPPED BY THREAD</div>
+      <h1 class="auth-hero__title">
+        <span class="auth-hero__line-1">Every piece,</span>
+        <span class="auth-hero__line-2"><em>verified</em>.</span>
+      </h1>
+      <p class="auth-hero__lede">
+        Counterfeits are getting better. Your standards shouldn't have to drop.
+        <br>
+        Here's exactly how we make sure every piece you receive is the real thing.
+      </p>
+    </header>
+
+    <!-- INTERACTIVE PROCESS CARDS — click to expand -->
+    <section class="auth-cards">
+      <div class="auth-cards__head">
+        <span class="auth-cards__head-eyebrow">The Process</span>
+        <h2 class="auth-cards__head-title">Tap a step to see how we do it</h2>
+        <span class="auth-cards__head-hint">Click any card · use ← → arrows or swipe</span>
+      </div>
+
+      <div class="auth-cards__row" id="auth-cards-row">
+
+        <!-- CARD 1 -->
+        <button class="auth-card auth-card--active" data-auth-card="1" type="button" aria-expanded="true">
+          <div class="auth-card__num">01</div>
+          <div class="auth-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+              <!-- Source: handshake / verified channel -->
+              <path class="auth-svg-stroke" d="M14 50 L28 36 L36 44 L48 32 L62 46" />
+              <circle class="auth-svg-stroke" cx="62" cy="46" r="4" fill="none"/>
+              <circle class="auth-svg-stroke" cx="14" cy="50" r="4" fill="none"/>
+              <path class="auth-svg-stroke" d="M22 60 H 58" stroke-dasharray="2 4"/>
+              <path class="auth-svg-stroke auth-svg-accent" d="M40 22 L43 28 L49 28 L44 32 L46 38 L40 34 L34 38 L36 32 L31 28 L37 28 Z"/>
+            </svg>
+          </div>
+          <div class="auth-card__title">Sourced direct</div>
+          <div class="auth-card__subtitle">From verified channels only</div>
+
+          <div class="auth-card__expand">
+            <p class="auth-card__body">Every piece comes from <strong>direct relationships</strong> with retailers, authorized dealers, and brand partners. We don't buy from open-market resellers, eBay flips, or anonymous wholesalers — the channels where counterfeits enter the supply chain.</p>
+            <div class="auth-card__highlight">
+              <span class="auth-card__highlight-label">Our rule</span>
+              <span class="auth-card__highlight-value">If we can't trace it, we don't carry it.</span>
+            </div>
+          </div>
+        </button>
+
+        <!-- CARD 2 -->
+        <button class="auth-card" data-auth-card="2" type="button" aria-expanded="false">
+          <div class="auth-card__num">02</div>
+          <div class="auth-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+              <!-- Inspect: magnifying glass over a tag -->
+              <rect class="auth-svg-stroke" x="20" y="22" width="32" height="40" rx="2"/>
+              <line class="auth-svg-stroke" x1="26" y1="32" x2="46" y2="32"/>
+              <line class="auth-svg-stroke" x1="26" y1="40" x2="42" y2="40"/>
+              <line class="auth-svg-stroke" x1="26" y1="48" x2="38" y2="48"/>
+              <circle class="auth-svg-stroke auth-svg-accent" cx="52" cy="50" r="11"/>
+              <line class="auth-svg-stroke auth-svg-accent" x1="60" y1="58" x2="68" y2="66"/>
+            </svg>
+          </div>
+          <div class="auth-card__title">Hand-inspected</div>
+          <div class="auth-card__subtitle">Physical check on arrival</div>
+
+          <div class="auth-card__expand">
+            <p class="auth-card__body">Before any piece is photographed or listed, it goes through <strong>physical inspection</strong>. Stitching, weight, label placement, hardware quality, print registration, fabric hand-feel — every detail compared against verified reference pieces from our archive.</p>
+            <div class="auth-card__highlight">
+              <span class="auth-card__highlight-label">If anything's off</span>
+              <span class="auth-card__highlight-value">It gets rejected and returned.</span>
+            </div>
+          </div>
+        </button>
+
+        <!-- CARD 3 -->
+        <button class="auth-card" data-auth-card="3" type="button" aria-expanded="false">
+          <div class="auth-card__num">03</div>
+          <div class="auth-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+              <!-- Verify: hangtag with checkmark -->
+              <path class="auth-svg-stroke" d="M30 16 L52 16 L60 36 L52 64 L28 64 L20 36 Z"/>
+              <circle class="auth-svg-stroke" cx="40" cy="24" r="2.5" fill="currentColor"/>
+              <line class="auth-svg-stroke" x1="40" y1="14" x2="40" y2="22"/>
+              <path class="auth-svg-stroke auth-svg-accent" d="M30 42 L37 49 L50 36" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <div class="auth-card__title">Tag verified</div>
+          <div class="auth-card__subtitle">Brand markers checked</div>
+
+          <div class="auth-card__expand">
+            <p class="auth-card__body">Original brand tags must be intact and matching. We verify hangtags, security tags, RFID chips where applicable, and original packaging. <strong>Hellstar's woven tags, Bape's ape head security stickers, Supreme's holographic codes</strong> — we know what each brand's authentic markers look like, and we check every one.</p>
+            <div class="auth-card__highlight">
+              <span class="auth-card__highlight-label">No tags</span>
+              <span class="auth-card__highlight-value">No listing. Period.</span>
+            </div>
+          </div>
+        </button>
+
+        <!-- CARD 4 -->
+        <button class="auth-card" data-auth-card="4" type="button" aria-expanded="false">
+          <div class="auth-card__num">04</div>
+          <div class="auth-card__icon" aria-hidden="true">
+            <svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+              <!-- Sealed: envelope with star wax seal -->
+              <rect class="auth-svg-stroke" x="14" y="22" width="52" height="38" rx="1"/>
+              <path class="auth-svg-stroke" d="M14 24 L40 44 L66 24"/>
+              <circle class="auth-svg-stroke auth-svg-accent" cx="40" cy="48" r="11" fill="none"/>
+              <path class="auth-svg-stroke auth-svg-accent" d="M40 41 L42 46 L47 46 L43 49 L45 54 L40 51 L35 54 L37 49 L33 46 L38 46 Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="auth-card__title">Sealed &amp; signed</div>
+          <div class="auth-card__subtitle">Certificate ships with order</div>
+
+          <div class="auth-card__expand">
+            <p class="auth-card__body">Every order ships with a <strong>Shopped By Thread authentication card</strong>, hand-signed and dated by the team member who verified your piece. If you ever question what you received, that card is your guarantee.</p>
+            <div class="auth-card__highlight">
+              <span class="auth-card__highlight-label">Backed by</span>
+              <span class="auth-card__highlight-value">7-day full refund. No questions.</span>
+            </div>
+          </div>
+        </button>
+
+      </div>
+
+      <!-- Pagination dots (mobile + desktop) -->
+      <div class="auth-cards__dots" role="tablist" aria-label="Process steps">
+        <button class="auth-cards__dot auth-cards__dot--active" data-auth-dot="1" aria-label="Step 1"></button>
+        <button class="auth-cards__dot" data-auth-dot="2" aria-label="Step 2"></button>
+        <button class="auth-cards__dot" data-auth-dot="3" aria-label="Step 3"></button>
+        <button class="auth-cards__dot" data-auth-dot="4" aria-label="Step 4"></button>
+      </div>
+    </section>
+
+    <!-- WHAT WE CHECK — granular trust grid -->
+    <section class="auth-checks-v2">
+      <div class="auth-checks-v2__head">
+        <span class="auth-checks-v2__eyebrow">Inside the inspection</span>
+        <h2 class="auth-checks-v2__title">Six markers <em>counterfeits</em> always get wrong.</h2>
+      </div>
+      <div class="auth-checks-v2__grid">
+        <div class="auth-mark"><span class="auth-mark__num">→</span><strong>Stitching density.</strong> Authentic pieces have consistent stitch counts per inch. Replicas often have looser, uneven stitching especially around logos and seams.</div>
+        <div class="auth-mark"><span class="auth-mark__num">→</span><strong>Hardware weight.</strong> Zippers, snaps, drawcord aglets — authentic hardware has noticeable weight and finish. Counterfeits feel hollow.</div>
+        <div class="auth-mark"><span class="auth-mark__num">→</span><strong>Label placement.</strong> Inner labels are sewn at exact distances from seams on authentic pieces. We have reference measurements for every brand we carry.</div>
+        <div class="auth-mark"><span class="auth-mark__num">→</span><strong>Print registration.</strong> Multi-color graphics need perfect alignment. Even a 1mm misregistration means it didn't come off an authentic press line.</div>
+        <div class="auth-mark"><span class="auth-mark__num">→</span><strong>Fabric weight.</strong> Authentic pieces hit specific weights — Bape heavyweight tees are 7oz, Hellstar hoodies are 14oz. We weigh every garment.</div>
+        <div class="auth-mark"><span class="auth-mark__num">→</span><strong>Security codes.</strong> Holographic stickers, RFID chips, woven security strips, hangtag QR codes — we verify these match each brand's current production batch.</div>
+      </div>
+    </section>
+
+    <!-- GUARANTEE -->
+    <section class="auth-guarantee-v2">
+      <div class="auth-guarantee-v2__seal" aria-hidden="true">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1">
+          <circle cx="50" cy="50" r="46"/>
+          <circle cx="50" cy="50" r="38" stroke-dasharray="2 3"/>
+          <path d="M50 28 L54 44 L70 44 L57 53 L62 68 L50 59 L38 68 L43 53 L30 44 L46 44 Z" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="auth-guarantee-v2__eyebrow">The Shopped By Thread Guarantee</div>
+      <h2 class="auth-guarantee-v2__title">If it's not authentic, your money back. <em>Period.</em></h2>
+      <p class="auth-guarantee-v2__text">If any piece you receive doesn't match our authentication standard — for any reason — contact us within 7 days for a full refund and free return shipping. No fine print, no run-around.</p>
+      <div class="auth-guarantee-v2__ctas">
+        <a href="javascript:void(0)" class="auth-guarantee-v2__cta auth-guarantee-v2__cta--primary" data-nav="home">Browse the catalog →</a>
+        <a href="javascript:void(0)" class="auth-guarantee-v2__cta" data-nav="contact">Talk to us →</a>
+      </div>
+    </section>
+  </div>
+</div>
+
+
+<!-- ============================================ -->
+<!-- TOAST                                       -->
+<!-- ============================================ -->
+<div class="toast" id="toast">
+  <span id="toast-msg">Added to cart</span>
+  <span class="toast__view" data-nav="cart">View cart →</span>
+</div>
+
+
+<!-- ============================================ -->
+<!-- FOOTER                                      -->
+<!-- ============================================ -->
+<footer class="footer">
+  <div class="footer__grid">
+    <div class="footer__col footer__logo">
+      <img class="logo-img" alt="Shopped By Thread" data-logo>
+    </div>
+    <div class="footer__col">
+      <div class="footer__col-title">Shop</div>
+      <a href="javascript:void(0)" data-nav="home">New arrivals</a>
+      <a href="javascript:void(0)" data-nav="brands">All brands</a>
+      <a href="javascript:void(0)" data-nav="brand" data-brand="hellstar">Featured: Hellstar</a>
+      <a href="javascript:void(0)" data-nav="brand" data-brand="chrome-hearts">Grail Vault</a>
+    </div>
+    <div class="footer__col">
+      <div class="footer__col-title">Help</div>
+      <a href="javascript:void(0)" data-nav="contact">Contact</a>
+      <a href="javascript:void(0)" data-nav="authentication">Authentication</a>
+      <a href="javascript:void(0)" data-nav="terms">Shipping & Returns</a>
+      <a href="javascript:void(0)" data-nav="about">About</a>
+      <a href="javascript:void(0)" id="footer-wholesale" style="color:var(--logo-gold);margin-top:8px;font-weight:500;">Wholesale Access →</a>
+    </div>
+    <div class="footer__col">
+      <div class="footer__col-title">Follow</div>
+      <a href="https://instagram.com/shoppedbythread" target="_blank" rel="noopener">Instagram</a>
+      <a href="mailto:contact@shoppedbythread.com">Email us</a>
+      <a href="javascript:void(0)" data-nav="privacy">Privacy</a>
+      <a href="javascript:void(0)" data-nav="terms">Terms</a>
+    </div>
+  </div>
+  <div class="footer__bottom">
+    <span>© 2026 Shopped By Thread — All rights reserved</span>
+    <span>Las Vegas, NV / Worldwide shipping</span>
+  </div>
+</footer>
+
+
+<!-- ============================================ -->
+<!-- ZOOM MODAL                                  -->
+<!-- ============================================ -->
+<div class="zoom" id="zoom">
+  <span class="zoom__close">Close [ESC]</span>
+  <span class="zoom__hint">Move cursor to pan · click outside to close</span>
+  <div class="zoom__content" id="zoomContent">
+    <div class="zoom__img" id="zoomImg">Product</div>
+  </div>
+</div>
+
+
+<script src="assets/js/app.js"></script>
+
+<!-- Quick-view modal: first click on a product card pops up a preview here. -->
+<div class="quickview-modal" id="quickview-modal" aria-hidden="true"></div>
+
+</body>
+</html>
